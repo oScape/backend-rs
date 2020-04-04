@@ -1,12 +1,12 @@
 pub mod model;
 
-use model::{Driver, NewDriver};
-use diesel::prelude::*;
 use crate::utils::establish_connection;
+use diesel::prelude::*;
+use model::{Driver, NewDriver};
 
 pub fn create_driver(firstname: &str, lastname: &str) -> Driver {
     use crate::schema::drivers;
-    
+
     let connection = establish_connection();
 
     let new_driver = NewDriver {
@@ -18,8 +18,11 @@ pub fn create_driver(firstname: &str, lastname: &str) -> Driver {
         .values(&new_driver)
         .execute(&connection)
         .expect("Error saving new driver");
-    
-    drivers::table.order(drivers::id.desc()).first(&connection).unwrap()
+
+    drivers::table
+        .order(drivers::id.desc())
+        .first(&connection)
+        .unwrap()
 }
 
 pub fn get_driver(driver_id: i32) -> Driver {
@@ -27,7 +30,10 @@ pub fn get_driver(driver_id: i32) -> Driver {
 
     let connection = establish_connection();
 
-    drivers.filter(id.eq(driver_id)).first(&connection).expect("Error loading driver")
+    drivers
+        .filter(id.eq(driver_id))
+        .first(&connection)
+        .expect("Error loading driver")
 }
 
 pub fn enable_driver(driver_id: i32) {

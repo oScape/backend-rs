@@ -1,5 +1,5 @@
-use diesel::prelude::*;
 use diesel::mysql::MysqlConnection;
+use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
 

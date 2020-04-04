@@ -1,19 +1,19 @@
+use std::sync::mpsc;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::sync::mpsc;
 use std::thread;
 
 /// Wrapper around the `std::thread` feature, which allow to create a pool of threads,
 /// for executing jobs on multiple thread without dealing with concurrency.
-/// 
+///
 /// After creating a pool of threads with a limit number, it will wait until [`execute`] it with a closure.
 /// The thread will send a message to a `Worker` which will consume the job.
 /// Automatically deal with concurrency by using `Arc` and `Mutex` features.
-/// 
+///
 /// [`execute`]: #method.execute
-/// 
+///
 /// # Shutdown
-/// 
+///
 /// When the program is shutting down, it will properly close the thread at the end of their current job.
 pub struct ThreadPool {
     workers: Vec<Worker>,
@@ -22,13 +22,13 @@ pub struct ThreadPool {
 
 impl ThreadPool {
     /// Create a new ThreadPool.
-    /// 
+    ///
     /// The size is the number of threads in the pool.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// The `new` function will panic if the size is zero.
-	pub fn new(size: usize) -> ThreadPool {
+    pub fn new(size: usize) -> ThreadPool {
         assert!(size > 0);
 
         let (sender, receiver) = mpsc::channel();
@@ -39,18 +39,15 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-		ThreadPool {
-            workers,
-            sender
-        }
-	}
+        ThreadPool { workers, sender }
+    }
 
     /// Execute a ThreadPool.
-    /// 
+    ///
     /// The closure to execute once as job.
-	pub fn execute<F>(&self, f: F) 
-        where
-            F: FnOnce() + Send + 'static
+    pub fn execute<F>(&self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
     {
         let job = Box::new(f);
         self.sender.send(Message::NewJob(job)).unwrap();
@@ -82,18 +79,16 @@ struct Worker {
 
 impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Message>>>) -> Worker {
-        let thread = thread::spawn(move || {
-            loop {
-                let message = receiver.lock().unwrap().recv().unwrap();
-                match message {
-                    Message::NewJob(job) => {
-                        println!("Worker {} got a job; executing", id);
-                        job();
-                    },
-                     Message::Terminate => {
-                         println!("Worker {} was told to terminate.", id);
-                         break;
-                     }
+        let thread = thread::spawn(move || loop {
+            let message = receiver.lock().unwrap().recv().unwrap();
+            match message {
+                Message::NewJob(job) => {
+                    println!("Worker {} got a job; executing", id);
+                    job();
+                }
+                Message::Terminate => {
+                    println!("Worker {} was told to terminate.", id);
+                    break;
                 }
             }
         });
