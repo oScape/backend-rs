@@ -14,3 +14,6 @@ Multithreaded Web Server in rust-lang with a model managed by Diesel as ORM for 
 
 ## diesel_cli
 - Run `cargo install diesel_cli --no-default-features --features mysql`
+
+## Building server bin
+- If the build failed after change your environment variable, execute `cargo clean` and rebuild.
