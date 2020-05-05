@@ -30,9 +30,9 @@ fn handle_connection(mut stream: TcpStream) {
     let (status_line, contents) = if buffer.starts_with(get) {
         ("HTTP/1.1 200 OK\r\n\r\n", "hello")
     } else if buffer.starts_with(data) {
-        thread::sleep(Duration::from_secs(5));
-        ("HTTP/1.1 200 OK\r\n\r\n", "data")
+        ("HTTP/1.1 200 OK\r\n\r\n", "api data")
     } else if buffer.starts_with(sleep) {
+        thread::sleep(Duration::from_secs(5));
         ("HTTP/1.1 200 OK\r\n\r\n", "sleep")
     } else {
         ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "not found")
